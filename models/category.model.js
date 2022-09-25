@@ -6,6 +6,7 @@ const categorySchema = new Schema(
   {
     id: { type: Number, required: true },
     name: { type: String, required: true },
+    active: { type: Boolean, required: true, default: true }
   },
   {
     timestamps: true,
