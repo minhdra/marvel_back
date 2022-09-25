@@ -10,7 +10,7 @@ class CategoryController {
   }
 
   getById(req, res) {
-    const myQuery = { id: req.body.id, active: true };
+    const myQuery = { id: req.params.id, active: true };
     Category.findOne(myQuery)
       .then((category) => res.json(category))
       .catch((err) => res.status(400).json('Error: ' + err));
