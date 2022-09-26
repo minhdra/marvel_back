@@ -4,7 +4,7 @@ const Schema = mongoose.Schema;
 
 const movieSchema = new Schema(
   {
-    id: { type: Number, required: true },
+    id: { type: Number, required: true, unique: true},
     categories: { type: Array, required: true },
     duration: { type: Number, required: true },
     trailer: { type: String, required: true },
@@ -17,8 +17,9 @@ const movieSchema = new Schema(
     title: { type: String, required: true },
     companies: { type: Array, required: true },
     release_date: { type: String, required: true },
-    backdrop_path: { type: String, required: true },
-    poster_path: { type: String, required: true },
+    backdrop_path: { type: String },
+    poster_path: { type: String },
+    active: { type: Boolean, required: true, default: true }
   },
   {
     timestamps: true,

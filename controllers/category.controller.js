@@ -1,19 +1,30 @@
 const Category = require('../models/category.model');
 
 class CategoryController {
-  getAll(req, res) {
-    Category.find({ active: true })
-      .then((categories) => {
-        return res.json(categories);
-      })
-      .catch((err) => res.status(400).json('Error: ' + err));
+  // Search
+  search(req, res) {
+    let page = req.body.page || 1;
+    let pageSize = req.body.pageSize || 10;
+    let sort = req.body.sort;
+    const myQuery = {
+      id: { $exists: true },
+      name: { $regex: `.*${req.body.name}.*`, $options: 'i' },
+      active: true,
+    };
+    Category.find(myQuery)
+      .sort(sort ? { name: sort } : '')
+      .skip(page * pageSize - pageSize)
+      .limit(pageSize)
+      .then((category) => res.json(category))
+      .catch((err) => res.status(400).json('Error: ' + err.message));
   }
 
+  // Get by id
   getById(req, res) {
     const myQuery = { id: req.params.id, active: true };
     Category.findOne(myQuery)
       .then((category) => res.json(category))
-      .catch((err) => res.status(400).json('Error: ' + err));
+      .catch((err) => res.status(400).json('Error: ' + err.message));
   }
 
   // Create
