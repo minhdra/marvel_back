@@ -29,28 +29,25 @@ class CategoryController {
 
   // Create
   create(req, res) {
+    let category;
     Category.find()
       .sort({ id: -1 })
       .limit(1)
       .then((data) => {
-        if (data) {
-          const newId = data[0].id + 1;
-          const category = new Category({
-            id: newId,
-            name: req.body.name,
-          });
-
-          category.save((err, category) => {
-            if (err) {
-              console.log(err);
-              return err;
-            } else {
-              return res
-                .status(200)
-                .json('Create successful with category: ' + category.name);
-            }
-          });
-        }
+        const newId = data.length > 0 ? data[0].id + 1 : 1;
+        category = new Category({
+          id: newId,
+          name: req.body.name,
+        });
+        category.save((err, category) => {
+          if (err) {
+            return res.status(400).json('Cannot save!');
+          } else {
+            return res
+              .status(200)
+              .json('Created successful with category: ' + category.name);
+          }
+        });
       });
   }
 
@@ -60,10 +57,16 @@ class CategoryController {
     Category.findOne(myQuery)
       .then((category) => {
         if (category) {
+          const name = category.name;
           category.name = req.body.name;
           category.save((err) => {
             if (err) return res.status(400).json('Error saving category');
-            else return res.status(200).json('Successfully updated category');
+            else
+              return res
+                .status(200)
+                .json(
+                  `Successfully updated category from ${name} to ${category.name}`
+                );
           });
         } else return res.status(404).json('Category not found');
       })
@@ -79,7 +82,10 @@ class CategoryController {
           category.active = false;
           category.save((err) => {
             if (err) return res.status(400).json('Error deleting category');
-            else return res.status(200).json('Successfully deleted category');
+            else
+              return res
+                .status(200)
+                .json(`Successfully deleted category: ${category.name}`);
           });
         } else return res.status(404).json('Category not found');
       })

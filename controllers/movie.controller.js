@@ -37,6 +37,7 @@ class MovieController {
       active: true,
     };
     Movie.aggregate([
+      {$match: myQuery},
       {
         $graphLookup: {
           from: 'categories', // Match with to collection what want to search
@@ -74,41 +75,38 @@ class MovieController {
 
   // Create
   create(req, res) {
+    let movie;
     Movie.find()
       .sort({ id: -1 })
       .limit(1)
       .then((data) => {
-        if (data) {
-          const newId = data[0].id + 1;
-          const movie = new Movie({
-            id: newId,
-            categories: req.body.categories,
-            duration: req.body.duration,
-            trailer: req.body.trailer,
-            tagline: req.body.tagline,
-            overview: req.body.overview,
-            budget: req.body.budget,
-            revenue: req.body.revenue,
-            imdb_id: req.body.imdb_id,
-            status: req.body.status,
-            title: req.body.title,
-            companies: req.body.companies,
-            release_date: req.body.release_date,
-            backdrop_path: req.body.backdrop_path,
-            poster_path: req.body.poster_path,
-          });
-
-          movie.save((err, movie) => {
-            if (err) {
-              console.log(err);
-              return err;
-            } else {
-              return res
-                .status(200)
-                .json('Create successful with movie: ' + movie.title);
-            }
-          });
-        }
+        const newId = data.length > 0 ? data[0].id + 1 : 1;
+        movie = new Movie({
+          id: newId,
+          categories: req.body.categories,
+          duration: req.body.duration,
+          trailer: req.body.trailer,
+          tagline: req.body.tagline,
+          overview: req.body.overview,
+          budget: req.body.budget,
+          revenue: req.body.revenue,
+          imdb_id: req.body.imdb_id,
+          status: req.body.status,
+          title: req.body.title,
+          companies: req.body.companies,
+          release_date: req.body.release_date,
+          backdrop_path: req.body.backdrop_path,
+          poster_path: req.body.poster_path,
+        });
+        movie.save((err, movie) => {
+          if (err) {
+            return res.status(400).json('Cannot save!');
+          } else {
+            return res
+              .status(200)
+              .json('Create successful with movie: ' + movie.title);
+          }
+        });
       });
   }
 
@@ -117,7 +115,9 @@ class MovieController {
     const myQuery = { id: req.body.id, active: true };
     Movie.findOne(myQuery)
       .then((movie) => {
-        if (movie) {
+        if (movie)
+        {
+          const name = movie.title;
           movie.categories = req.body.categories;
           movie.duration = req.body.duration;
           movie.trailer = req.body.trailer;
@@ -134,7 +134,7 @@ class MovieController {
           movie.poster_path = req.body.poster_path;
           movie.save((err) => {
             if (err) return res.status(400).json('Error saving movie');
-            else return res.status(200).json('Successfully updated movie');
+            else return res.status(200).json(`Successfully updated movie from ${name} to ${movie.title}`);
           });
         } else return res.status(404).json('Movie not found');
       })
@@ -150,7 +150,7 @@ class MovieController {
           movie.active = false;
           movie.save((err) => {
             if (err) return res.status(400).json('Error deleting movie');
-            else return res.status(200).json('Successfully deleted movie');
+            else return res.status(200).json(`Successfully deleted movie: ${movie.title}`);
           });
         } else return res.status(404).json('Movie not found');
       })
