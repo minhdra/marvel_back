@@ -8,6 +8,8 @@ class DashboardController {
         <div>/categories</div>
         <div>/movies</div>
         <div>/characters</div>
+        <div>/abilities</div>
+        <div>/stories</div>
       </center>
     `
     );

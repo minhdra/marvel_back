@@ -1,31 +1,6 @@
 const Movie = require('../models/movie.model');
 
 class MovieController {
-  /** getAll(req, res) {
-    Movie.aggregate([
-      {
-        $graphLookup: {
-          from: 'categories', // Match with to collection what want to search
-          startWith: '$categories', // Name of array (origin)
-          connectFromField: 'categories', // Field of array
-          connectToField: 'id', // from which field it will match
-          as: 'categories', // Add or replace field in origin collection
-        },
-      },
-      {
-        $graphLookup: {
-          from: 'companies', // Match with to collection what want to search
-          startWith: '$companies', // Name of array (origin)
-          connectFromField: 'companies', // Field of array
-          connectToField: 'id', // from which field it will match
-          as: 'companies', // Add or replace field in origin collection
-        },
-      },
-    ]).then((movies) => {
-      return res.json(movies.filter((movie) => movie.active === true));
-    });
-  } */
-
   // Search
   search(req, res) {
     let page = req.body.page || 1;
@@ -36,8 +11,8 @@ class MovieController {
       title: { $regex: `.*${req.body.title}.*`, $options: 'i' },
       active: true,
     };
-    Movie.aggregate([
-      {$match: myQuery},
+    let aggregateQuery = [
+      { $match: myQuery },
       {
         $graphLookup: {
           from: 'categories', // Match with to collection what want to search
@@ -56,8 +31,13 @@ class MovieController {
           as: 'companies', // Add or replace field in origin collection
         },
       },
-    ])
-      .sort(sort ? { name: sort } : '')
+    ];
+    if (sortName)
+    {
+      sort.name = sortName;
+      aggregateQuery.push({$sort: sort})
+    }
+    Movie.aggregate(aggregateQuery)
       .skip(page * pageSize - pageSize)
       .limit(pageSize)
       .then((movies) => {
@@ -67,9 +47,33 @@ class MovieController {
 
   // Get by id
   getById(req, res) {
-    const myQuery = { id: req.params.id, active: true };
-    Movie.findOne(myQuery)
-      .then((movie) => res.json(movie))
+    const myQuery = { id: Number(req.params.id), active: true };
+    let aggregateQuery = [
+      { $match: myQuery },
+      {
+        $graphLookup: {
+          from: 'categories', // Match with to collection what want to search
+          startWith: '$categories', // Name of array (origin)
+          connectFromField: 'categories', // Field of array
+          connectToField: 'id', // from which field it will match
+          as: 'categories', // Add or replace field in origin collection
+        },
+      },
+      {
+        $graphLookup: {
+          from: 'companies', // Match with to collection what want to search
+          startWith: '$companies', // Name of array (origin)
+          connectFromField: 'companies', // Field of array
+          connectToField: 'id', // from which field it will match
+          as: 'companies', // Add or replace field in origin collection
+        },
+      },
+    ];
+    Movie.aggregate(aggregateQuery)
+      .limit(1)
+      .then((movies) => {
+        return res.json(movies[0]);
+      })
       .catch((err) => res.status(400).json('Error: ' + err.message));
   }
 
