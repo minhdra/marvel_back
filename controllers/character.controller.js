@@ -34,6 +34,15 @@ class CharacterController {
           as: 'story_moments', // Add or replace field in origin collection
         },
       },
+      {
+        $graphLookup: {
+          from: 'abilities', // Match with to collection what want to search
+          startWith: '$abilities', // Name of array (origin)
+          connectFromField: 'abilities', // Field of array
+          connectToField: 'id', // from which field it will match
+          as: 'abilities', // Add or replace field in origin collection
+        },
+      },
     ];
     if (sortName || sortHero) {
       if (sortName) sort.name = sortName;
@@ -60,6 +69,24 @@ class CharacterController {
           connectFromField: 'movies', // Field of array
           connectToField: 'id', // from which field it will match
           as: 'movies', // Add or replace field in origin collection
+        },
+      },
+      {
+        $graphLookup: {
+          from: 'stories', // Match with to collection what want to search
+          startWith: '$story_moments', // Name of array (origin)
+          connectFromField: 'story_moments', // Field of array
+          connectToField: 'id', // from which field it will match
+          as: 'story_moments', // Add or replace field in origin collection
+        },
+      },
+      {
+        $graphLookup: {
+          from: 'abilities', // Match with to collection what want to search
+          startWith: '$abilities', // Name of array (origin)
+          connectFromField: 'abilities', // Field of array
+          connectToField: 'id', // from which field it will match
+          as: 'abilities', // Add or replace field in origin collection
         },
       },
     ];
